@@ -1,0 +1,6 @@
+__pycache__
+.venv
+tests
+poetry.lock
+COTAHIST_A2023.TXT
+COTAHIST_A2024.TXT

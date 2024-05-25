@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "neoway-b3"
+version = "0.1.0"
+description = ""
+authors = ["Danilo <danilo.ferreira@jones.ag>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pandas = "^2.2.2"
+requests = "^2.31.0"
+google-cloud = "^0.34.0"
+pyarrow = "^16.1.0"
+uvicorn = "^0.29.0"
+fastapi = "^0.111.0"
+google-cloud-bigquery = "^3.23.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
