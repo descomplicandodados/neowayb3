@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from google.cloud import bigquery
 import requests
-import plotly.express as px
+import plotly.graph_objects as go
 
 # Conecta-se ao BigQuery
 json_url = 'https://storage.googleapis.com/carteira1/neowayb3-e91ece58c23c.json'
@@ -37,24 +37,43 @@ df_segmentos = get_data(query_segmentos)
 merged_df = pd.merge(df_acoes, df_segmentos, how='inner', left_on='nome_empresa', right_on='nome_fantasia')
 merged_df = merged_df.sort_values('data_pregao')
 
-merged_df['month'] = merged_df['data_pregao'].apply(lambda x: str(x.year) + '-' + str(x.month))
-month = st.sidebar.selectbox('Mês', merged_df['month'].unique())
+
+# Filtros
 company = st.sidebar.selectbox('Empresa', merged_df['nome_fantasia'].unique())
+tickers = st.sidebar.selectbox('Tickers', merged_df['cod_negociacao'].unique())
 segment = st.sidebar.selectbox('Segmento', merged_df['segmento'].unique())
 market = st.sidebar.selectbox('Mercado', merged_df['mercado'].unique())
 
-# Filtro para selecionar múltiplas datas usando um calendário
-selected_dates = st.sidebar.date_input('Selecione as datas', 
-                                       min_value=min(merged_df['data_pregao']),
-                                       max_value=max(merged_df['data_pregao']),
-                                       value=[min(merged_df['data_pregao']), max(merged_df['data_pregao'])],
-                                       key='date_range')
+# Crie a caixa de seleção de intervalo de datas
+data_inicio = st.sidebar.date_input('Selecione a data de início:', min(merged_df['data_pregao']), key='start_date')
+data_fim = st.sidebar.date_input('Selecione a data de término:', max(merged_df['data_pregao']), key='end_date')
 
-# Aplicando os filtros encadeados
-df_filtered = merged_df[(merged_df['month'] == month) & 
-                        (merged_df['segmento'] == segment) & 
+# Filtre o DataFrame com base no intervalo de datas selecionado
+df_filtrado = merged_df[
                         (merged_df['nome_fantasia'] == company) &
+                        (merged_df['cod_negociacao'] == tickers) &
+                        (merged_df['segmento'] == segment) &
                         (merged_df['mercado'] == market) &
-                        (merged_df['data_pregao'].isin(selected_dates))]
+                        (merged_df['data_pregao'] >= data_inicio) &
+                        (merged_df['data_pregao'] <= data_fim)]
 
-df_filtered
+# Exibindo a tabela com os filtros
+st.write(df_filtrado)
+
+# Corrigindo a conversão da coluna 'data_pregao' para datetime
+merged_df.loc[:, 'data_pregao'] = pd.to_datetime(merged_df['data_pregao'])
+
+# Criação do gráfico de candlestick
+fig = go.Figure(data=[go.Candlestick(x=df_filtrado['data_pregao'],
+                                     open=df_filtrado['preco_abertura'],
+                                     high=df_filtrado['preco_maximo'],
+                                     low=df_filtrado['preco_minimo'],
+                                     close=df_filtrado['preco_ultimo_negocio'])])
+
+# Atualiza o layout do gráfico
+fig.update_layout(title='Gráfico de Candlestick - Preço Médio',
+                  xaxis_title='Data',
+                  yaxis_title='Preço Médio')
+
+# Exibe o gráfico
+st.plotly_chart(fig)

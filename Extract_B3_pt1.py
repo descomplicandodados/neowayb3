@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 
-# Função para gerar sequências de caracteres de acordo com a regra fornecida
+# Função para gerar sequências de caracteres 
 def generate_custom_sequences():
     sequences = []
     for first in ['M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']:
@@ -9,7 +9,7 @@ def generate_custom_sequences():
             sequences.append(f"{first}{second}")
     return sequences
 
-# Função para obter dados de uma URL
+# Função para obter dados da URL
 def get_data_from_url(url):
     try:
         response = requests.get(url)
@@ -27,7 +27,7 @@ base_url = 'https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/Compan
 char_position_start = 138
 char_position_end = 140
 
-# Gerar todas as sequências de caracteres de acordo com a regra fornecida
+# Gerar todas as sequências de caracteres
 sequences = generate_custom_sequences()
 
 # Lista para armazenar todas as URLs geradas
