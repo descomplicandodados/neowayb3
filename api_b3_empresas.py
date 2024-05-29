@@ -6,7 +6,7 @@ import pandas as pd
 import uvicorn
 
 # Carrega as credenciais do Google Cloud
-json_url = 'JSON URL, AQUI HOSPEDEI EM UMA BUCKET NA GCP'
+json_url = 'https://storage.googleapis.com/carteira1/neowayb3-e91ece58c23c.json'
 response = requests.get(json_url)
 json_path = response.json()
 
