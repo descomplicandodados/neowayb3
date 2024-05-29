@@ -323,7 +323,7 @@ import pandas as pd
 import uvicorn
 
 # Carrega as credenciais do Google Cloud
-json_url = 'https://storage.googleapis.com/carteira1/neowayb3-e91ece58c23c.json'
+json_url = 'JASON HOSPEDADO EM BUCKET DA CGP'
 response = requests.get(json_url)
 json_path = response.json()
 
@@ -364,7 +364,7 @@ import requests
 import plotly.graph_objects as go
 
 # Conecta-se ao BQ
-json_url = 'https://storage.googleapis.com/carteira1/neowayb3-e91ece58c23c.json'
+json_url = 'JSON HOSPEDADO EM BUCKET DA GCP'
 response = requests.get(json_url)
 json_path = response.json()
 client = bigquery.Client.from_service_account_info(json_path)
