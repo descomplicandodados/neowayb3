@@ -4,7 +4,7 @@ Este projeto tem como objetivo baixar e processar dados históricos de cotaçõe
 
 **Requisitos**
 
-- Python 3.x
+- Python 3.9+
 - Pandas
 - Requests
 - Google Cloud BigQuery
@@ -12,13 +12,73 @@ Este projeto tem como objetivo baixar e processar dados históricos de cotaçõe
 - Streamlit
 - Uvicorn
 
-**Passos Iniciais**
+
+**Passo a passo dos scripts**
 - Baixar o histórico das cotações de 2023 e 2024 do [site da B3](https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/historico/mercado-a-vista/series-historicas/), arquivos vem no formato txt.
 - Baixar o layout dos arquivos: [SeriesHistoricas_Layout.pdf](https://www.b3.com.br/data/files/33/67/B9/50/D84057102C784E47AC094EA8/SeriesHistoricas_Layout.pdf).
+- O caminho do arquivo onde foi baixado o historico das cotações, será usado em alguns dos scritps a seguir.
+
+**Como Executar**
+   
+- Clone o repositório para sua máquina local
+
+```
+git clone git@github.com:descomplicandodados/neowayb3.git
+```
+- Navegue até a pasta do projeto
+```
+cd neowayb3
+```
+- Instale as dependências
+
+```
+pip install -r requirements.txt
+```
+- Execute os arquivos
+```
+Historico 2023.py
+```
+```
+Historico 2024.py
+```
+```
+Extract_B3_pt1.py
+```
+
+```
+Extract_B3_pt2.py
+```
+
+```
+Extract_B3_pt3.py
+```
+
+```
+Extract_B3_pt4.py
+```
+
+```
+tobigquery.py
+```
+
+```
+api_b3_empresas.py
+```
+
+```
+uvicorn api_b3_historico:app
+```
+```
+uvicorn api_b3_empresas:app
+```
+```
+streamlit run dashboard.py
+```
+- Não se esqueça de adaptar os caminhos dos arquivos dos scripts para o caminho que salvou os arquivos de historico de cotação, do json para acesso ao BigQuery e o caminho em que salva os arquivos transformados em CSV. 
 
 **Conversão do Arquivo TXT para CSV**
 
-O script a seguir converte os dados de cotações do formato TXT para CSV utilizando as regras especificadas no layout:
+O script a seguir converte os dados de cotações do formato TXT para CSV utilizando as regras especificadas no layout SeriesHistoricas_Layout:
 
 
 ```python
@@ -62,7 +122,6 @@ dados_acoes.columns = [
 "codigo_isin",
 "num_distribuicao_papel"]
 
-# Eliminar a última linha
 linha=len(dados_acoes["data_pregao"])
 dados_acoes=dados_acoes.drop(linha-1)
 
@@ -119,17 +178,13 @@ def get_data_from_url(url):
         print(f"Erro na requisição para a URL {url}: {e}")
         return []
 
-# URL base
 base_url = 'https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/CompanyCall/GetInitialCompanies/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjEyMH0='
 
-# Posição dos caracteres a serem modificados
 char_position_start = 138
 char_position_end = 140
 
-# Gerar todas as sequências de caracteres
 sequences = generate_custom_sequences()
 
-# Lista para armazenar todas as URLs geradas
 all_urls = []
 
 # Gerar todas as URLs
@@ -137,7 +192,6 @@ for seq in sequences:
     modified_url = base_url[:char_position_start] + seq + base_url[char_position_end:]
     all_urls.append(modified_url)
 
-# Lista para armazenar todos os dados
 all_companies_data = []
 
 # Fazer o request da URL base e adicionar os resultados à lista all_companies_data
@@ -161,7 +215,7 @@ for url in all_urls[1:]:  # Começar da segunda URL, pois a primeira já foi pro
     results = get_data_from_url(url)
     if not results or any(company in all_companies_data for company in results):
         print(f"Nenhum resultado ou dados repetidos encontrados. Parando.")
-        break  # Interromper o loop se não houver resultados ou se os dados forem repetidos
+        break 
     for company in results:
         issuing_company = company['issuingCompany']
         company_name = company['companyName']
@@ -171,12 +225,10 @@ for url in all_urls[1:]:  # Começar da segunda URL, pois a primeira já foi pro
         market = company['market']
         all_companies_data.append([issuing_company, company_name, trading_name, cnpj, segment, market])
 
-# Criar um DataFrame com os dados acumulados
 df = pd.DataFrame(all_companies_data, columns=['issuingCompany', 'companyName', 'tradingName', 'cnpj', 'segment', 'market'])
 
 df_descuplicado = df.drop_duplicates()
 
-# Exibir o DataFrame
 print(df_descuplicado)
 
 # Salvar o DataFrame em um arquivo CSV
@@ -191,17 +243,13 @@ Scripts 2, 3 e 4
 Os scripts seguintes seguem uma lógica parecida, mas com diferentes URLs base e regras de geração de URLs dinâmicas, optei por dividir o script em 4 partes devido a serem 4 diferentes regras para criação das URLS dinâmicas
 
 ``` python
-# URL base inicial
 base_url = 'https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/CompanyCall/GetInitialCompanies/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MTAsInBhZ2VTaXplIjoxMjB9'
 
 
-# Caractere a ser modificado na URL base
 char_position = 140
 
-# Lista para armazenar todas as URLs geradas
 all_urls = []
 
-# Letra inicial para substituição na URL
 start_letter = 'A'
 
 # Gerar as URLs
@@ -215,17 +263,13 @@ while True:
 ```
 
 ``` python
-# URL base inicial
 base_url = 'https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/CompanyCall/GetInitialCompanies/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MTcsInBhZ2VTaXplIjoxMjB9'
 
 
-# Caractere a ser modificado na URL base
 char_position = 140
 
-# Lista para armazenar todas as URLs geradas
 all_urls = []
 
-# Letra inicial para substituição na URL
 start_letter = 'c'
 
 # Gerar as URLs
@@ -238,17 +282,13 @@ while True:
         break
 ```
 ``` python
-# URL base inicial
 base_url = 'https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/CompanyCall/GetInitialCompanies/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MjAsInBhZ2VTaXplIjoxMjB9'
 
 
-# Caractere a ser modificado na URL base
 char_position = 140
 
-# Lista para armazenar todas as URLs geradas
 all_urls = []
 
-# Letra inicial para substituição na URL
 start_letter = 'A'
 
 # Gerar as URLs
@@ -270,7 +310,6 @@ Este script carrega os dados processados para o BigQuery.
 import pandas as pd
 from google.cloud import bigquery
 
-# Caminhos dos arquivos CSV
 csv_file_path_p1 = r"SEUCAMINHO_pt1.csv"
 csv_file_path_p2 = r"SEUCAMINHO_pt2.csv"
 csv_file_path_p3 = r"SEUCAMINHO_pt3.csv"
@@ -282,20 +321,17 @@ conjunto_dados = "bronze"
 tabela = "b3_empresas"
 json_path = r"SEU JSON"
 
-# Ler os arquivos CSV
 df_p1 = pd.read_csv(csv_file_path_p1)
 df_p2 = pd.read_csv(csv_file_path_p2)
 df_p3 = pd.read_csv(csv_file_path_p3)
 df_p4 = pd.read_csv(csv_file_path_p4)
 
 
-# Concatenar os DataFrames
 df_combined = pd.concat([df_p1, df_p2, df_p3, df_p4], ignore_index=True)
 
 # Configurar cliente BigQuery
 client = bigquery.Client.from_service_account_json(json_path)
 
-# Nome completo da tabela
 table_ref = client.dataset(conjunto_dados).table(tabela)
 
 # Enviar dados para o BigQuery
@@ -327,26 +363,20 @@ json_url = 'JASON HOSPEDADO EM BUCKET DA CGP'
 response = requests.get(json_url)
 json_path = response.json()
 
-# Configura o cliente BQ com as credenciais fornecidas
 client = bigquery.Client.from_service_account_info(json_path)
 
-# Consulta SQL para selecionar todos os dados da tabela b3_empresas
 query = """
 SELECT *
 FROM `neowayb3.silver.b3_empresas`
 """
 
-# Envia a consulta para o BQ
 query_job = client.query(query)
 df = query_job.result().to_dataframe()
 
-# Converter DataFrame para um dicionário
 df_dict = df.to_dict(orient='records')
 
-# Criar o servidor FastAPI
 app = FastAPI()
 
-# Definir um endpoint para obter os dados da tabela b3_empresas
 @app.get("/b3_empresas")
 async def get_b3_empresas():
     return df_dict
@@ -375,14 +405,12 @@ def get_data(query):
     df = query_job.to_dataframe()
     return df
 
-# Query para buscar dados das ações
 query_acoes = """
 SELECT *
 FROM neowayb3.gold.fact_historico
 WHERE data_pregao >= current_date() - 180
 """
 
-# Query para buscar dados dos segmentos
 query_segmentos = """
 SELECT *
 FROM neowayb3.gold.dim_segmento
@@ -392,7 +420,6 @@ FROM neowayb3.gold.dim_segmento
 df_acoes = get_data(query_acoes)
 df_segmentos = get_data(query_segmentos)
 
-# Realiza a junção entre a tabela fato e dimensão usando a coluna nome da empresa
 merged_df = pd.merge(df_acoes, df_segmentos, how='inner', left_on='nome_empresa', right_on='nome_fantasia')
 merged_df = merged_df.sort_values('data_pregao')
 
@@ -402,12 +429,9 @@ company = st.sidebar.selectbox('Empresa', merged_df['nome_fantasia'].unique())
 tickers = st.sidebar.selectbox('Tickers', merged_df['cod_negociacao'].unique())
 segment = st.sidebar.selectbox('Segmento', merged_df['segmento'].unique())
 market = st.sidebar.selectbox('Mercado', merged_df['mercado'].unique())
-
-# Crie a caixa de seleção de intervalo de datas
 data_inicio = st.sidebar.date_input('Selecione a data de início:', min(merged_df['data_pregao']), key='start_date')
 data_fim = st.sidebar.date_input('Selecione a data de término:', max(merged_df['data_pregao']), key='end_date')
 
-# Filtre o DataFrame com base no intervalo de datas selecionado
 df_filtrado = merged_df[
                         (merged_df['nome_fantasia'] == company) &
                         (merged_df['cod_negociacao'] == tickers) &
@@ -416,10 +440,8 @@ df_filtrado = merged_df[
                         (merged_df['data_pregao'] >= data_inicio) &
                         (merged_df['data_pregao'] <= data_fim)]
 
-# Exibindo a tabela com os filtros
 st.write(df_filtrado)
 
-# Corrigindo a conversão da coluna 'data_pregao' para datetime
 merged_df.loc[:, 'data_pregao'] = pd.to_datetime(merged_df['data_pregao'])
 
 # Criação do gráfico de candlestick
@@ -434,7 +456,6 @@ fig.update_layout(title='Gráfico de Candlestick - Preço Médio',
                   xaxis_title='Data',
                   yaxis_title='Preço Médio')
 
-# Exibe o gráfico
 st.plotly_chart(fig)
 
 
