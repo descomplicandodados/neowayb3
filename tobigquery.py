@@ -1,7 +1,7 @@
 import pandas as pd
 from google.cloud import bigquery
 
-# Caminhos dos arquivos CSV
+
 csv_file_path_p1 = r"C:\Users\danil\Downloads\company_data_pt1.csv"
 csv_file_path_p2 = r"C:\Users\danil\Downloads\company_data_pt2.csv"
 csv_file_path_p3 = r"C:\Users\danil\Downloads\company_data_pt3.csv"

@@ -37,7 +37,6 @@ dados_acoes.columns = [
 "codigo_isin",
 "num_distribuicao_papel"]
 
-# Eliminar a última linha
 linha=len(dados_acoes["data_pregao"])
 dados_acoes=dados_acoes.drop(linha-1)
 
