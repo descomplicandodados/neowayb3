@@ -12,17 +12,13 @@ def get_data_from_url(url):
         print(f"Erro na requisição para a URL {url}: {e}")
         return []
 
-# URL base inicial
 base_url = 'https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/CompanyCall/GetInitialCompanies/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MTcsInBhZ2VTaXplIjoxMjB9'
 
 
-# Caractere a ser modificado na URL base
 char_position = 140
 
-# Lista para armazenar todas as URLs geradas
 all_urls = []
 
-# Letra inicial para substituição na URL
 start_letter = 'c'
 
 # Gerar as URLs
@@ -34,10 +30,9 @@ while True:
     if start_letter > 'z':
         break
 
-# Lista para armazenar todos os dados
+
 all_companies_data = []
 
-# Fazer o request para cada URL gerada e armazenar os resultados
 for url in all_urls:
     print(f"Processando URL: {url}")
     results = get_data_from_url(url)
@@ -53,12 +48,10 @@ for url in all_urls:
         market = company['market']
         all_companies_data.append([issuing_company, company_name, trading_name, cnpj, segment, market])
 
-# Criar um DataFrame com os dados acumulados
 df = pd.DataFrame(all_companies_data, columns=['issuingCompany', 'companyName', 'tradingName', 'cnpj', 'segment', 'market'])
 
 df_descuplicado = df.drop_duplicates()
 
-# Exibir o DataFrame
 print(df_descuplicado)
 
 # Salvar o DataFrame em um arquivo CSV

@@ -20,17 +20,14 @@ def get_data_from_url(url):
         print(f"Erro na requisição para a URL {url}: {e}")
         return []
 
-# URL base
 base_url = 'https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/CompanyCall/GetInitialCompanies/eyJsYW5ndWFnZSI6InB0LWJyIiwicGFnZU51bWJlciI6MSwicGFnZVNpemUiOjEyMH0='
 
-# Posição dos caracteres a serem modificados
 char_position_start = 138
 char_position_end = 140
 
 # Gerar todas as sequências de caracteres
 sequences = generate_custom_sequences()
 
-# Lista para armazenar todas as URLs geradas
 all_urls = []
 
 # Gerar todas as URLs
@@ -38,11 +35,8 @@ for seq in sequences:
     modified_url = base_url[:char_position_start] + seq + base_url[char_position_end:]
     all_urls.append(modified_url)
 
-# Lista para armazenar todos os dados
 all_companies_data = []
 
-# Fazer o request da URL base e adicionar os resultados à lista all_companies_data
-print(f"Processando URL base: {base_url}")
 results = get_data_from_url(base_url)
 if results:
     for company in results:
@@ -72,12 +66,10 @@ for url in all_urls[1:]:  # Começar da segunda URL, pois a primeira já foi pro
         market = company['market']
         all_companies_data.append([issuing_company, company_name, trading_name, cnpj, segment, market])
 
-# Criar um DataFrame com os dados acumulados
 df = pd.DataFrame(all_companies_data, columns=['issuingCompany', 'companyName', 'tradingName', 'cnpj', 'segment', 'market'])
 
 df_descuplicado = df.drop_duplicates()
 
-# Exibir o DataFrame
 print(df_descuplicado)
 
 # Salvar o DataFrame em um arquivo CSV

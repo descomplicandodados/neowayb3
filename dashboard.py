@@ -10,20 +10,17 @@ response = requests.get(json_url)
 json_path = response.json()
 client = bigquery.Client.from_service_account_info(json_path)
 
-# Função para buscar dados no BigQuery
 def get_data(query):
     query_job = client.query(query)
     df = query_job.to_dataframe()
     return df
 
-# Query para buscar dados das ações
 query_acoes = """
 SELECT *
 FROM neowayb3.gold.fact_historico
 WHERE data_pregao >= current_date() - 180
 """
 
-# Query para buscar dados dos segmentos
 query_segmentos = """
 SELECT *
 FROM neowayb3.gold.dim_segmento
@@ -33,18 +30,14 @@ FROM neowayb3.gold.dim_segmento
 df_acoes = get_data(query_acoes)
 df_segmentos = get_data(query_segmentos)
 
-# Realiza a junção entre as tabelas fato e dimensão usando a coluna de chave estrangeira comum
 merged_df = pd.merge(df_acoes, df_segmentos, how='inner', left_on='nome_empresa', right_on='nome_fantasia')
 merged_df = merged_df.sort_values('data_pregao')
 
 
-# Filtros
 company = st.sidebar.selectbox('Empresa', merged_df['nome_fantasia'].unique())
 tickers = st.sidebar.selectbox('Tickers', merged_df['cod_negociacao'].unique())
 segment = st.sidebar.selectbox('Segmento', merged_df['segmento'].unique())
 market = st.sidebar.selectbox('Mercado', merged_df['mercado'].unique())
-
-# Crie a caixa de seleção de intervalo de datas
 data_inicio = st.sidebar.date_input('Selecione a data de início:', min(merged_df['data_pregao']), key='start_date')
 data_fim = st.sidebar.date_input('Selecione a data de término:', max(merged_df['data_pregao']), key='end_date')
 
@@ -57,10 +50,8 @@ df_filtrado = merged_df[
                         (merged_df['data_pregao'] >= data_inicio) &
                         (merged_df['data_pregao'] <= data_fim)]
 
-# Exibindo a tabela com os filtros
 st.write(df_filtrado)
 
-# Corrigindo a conversão da coluna 'data_pregao' para datetime
 merged_df.loc[:, 'data_pregao'] = pd.to_datetime(merged_df['data_pregao'])
 
 # Criação do gráfico de candlestick
