@@ -11,7 +11,7 @@ csv_file_path_p4 = r"C:\Users\danil\Downloads\company_data_pt4.csv"
 projeto = "neowayb3"
 conjunto_dados = "bronze"
 tabela = "b3_empresas"
-json_path = r"C:\Users\danil\OneDrive\Área de Trabalho\neoway\neoway_b3\neowayb3-e91ece58c23c.json"
+json_path = r"SEUJSONAQUI.json"
 
 df_p1 = pd.read_csv(csv_file_path_p1)
 df_p2 = pd.read_csv(csv_file_path_p2)
